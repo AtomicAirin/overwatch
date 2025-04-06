@@ -16,6 +16,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Pull latest changes
+        run: git pull origin main
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -25,21 +28,22 @@ jobs:
         run: |
           wget -nc https://storage.googleapis.com/chrome-for-testing-public/122.0.6261.111/linux64/chrome-linux64.zip
           wget -nc https://storage.googleapis.com/chrome-for-testing-public/122.0.6261.111/linux64/chromedriver-linux64.zip
-          unzip -o chrome-linux64.zip
-          unzip -o chromedriver-linux64.zip
+          unzip -o chrome-linux64.zip -d /home/runner/chrome-linux64
+          unzip -o chromedriver-linux64.zip -d /home/runner/chromedriver-linux64
 
           pip install selenium
           pip install bs4
-          pip install csv
-          pip install time
 
       - name: Set up TODAY env variable
         run: echo "TODAY=$(TZ='America/Los_Angeles' date +'%Y_%m_%d')" >> $GITHUB_ENV
 
+      - name: List the files in /home/runner
+        run: ls -alh /home/runner/chromedriver-linux64 /home/runner/chrome-linux64
+
       - name: Run scraper
         env:
           TODAY: ${{ env.TODAY }}
-        run: python retriever.py
+        run: python -u retriever.py
       
       - name: Commit and push CSV
         run: |
